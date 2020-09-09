@@ -1,5 +1,6 @@
 from collections import defaultdict, namedtuple
 import math
+import pickle
 import statistics
 from typing import List, Union, Tuple
 
@@ -28,12 +29,13 @@ class SentenceAligner:
         length_ratio_full_transcript_min=0.167,
         length_ratio_full_transcript_max=6.0,
         fit_time_correction=True,
-        fit_iou_estimator=False,
+        fit_iou_estimator=True,
         iou_threshold=0.7,
         iou_estimator_optimize_hyperparams=True
     ):
         self.create_aligner_function = create_aligner_function
         self.alphabet = alphabet
+
         self.match_score = match_score
         self.mismatch_score = mismatch_score
         self.truth_left_open_gap_score = truth_left_open_gap_score
@@ -48,6 +50,7 @@ class SentenceAligner:
         self.stt_left_extend_gap_score = stt_left_extend_gap_score
         self.stt_internal_extend_gap_score = stt_internal_extend_gap_score
         self.stt_right_extend_gap_score = stt_right_extend_gap_score
+
         self.do_length_ratio_full_transcript_filtering_while_fitting = do_length_ratio_full_transcript_filtering_while_fitting
         self.length_ratio_full_transcript_min = length_ratio_full_transcript_min
         self.length_ratio_full_transcript_max = length_ratio_full_transcript_max
@@ -56,6 +59,15 @@ class SentenceAligner:
         self.iou_threshold = iou_threshold
         self.iou_estimator_optimize_hyperparams = iou_estimator_optimize_hyperparams
 
+        self.start_time_correction_ = None
+        self.end_time_correction_ = None
+        self.iou_estimator_ = None
+
+        self.aligner = None
+        self.setup()
+
+    def setup(self):
+        # Can't be pickled
         self.aligner = self.create_aligner_function(
             self.alphabet,
             match_score=self.match_score,
@@ -73,10 +85,6 @@ class SentenceAligner:
             query_internal_extend_gap_score=self.stt_internal_extend_gap_score,
             query_right_extend_gap_score=self.stt_right_extend_gap_score
         )
-
-        self.start_time_correction_ = None
-        self.end_time_correction_ = None
-        self.iou_estimator_ = None
 
     def fit(self, data: List[Tuple[List[AlignedSentence], List[Word]]]):
         if self.fit_time_correction:
@@ -117,7 +125,7 @@ class SentenceAligner:
     def predict(
         self,
         data_sentence_only: List[Tuple[List[str], List[Word]]],
-        do_length_ratio_full_transcript_filtering=True, do_time_correction=True, do_iou_estimate_filtering=False
+        do_length_ratio_full_transcript_filtering=True, do_time_correction=True, do_iou_estimate_filtering=True
     ) -> Tuple[List[List[AlignedSentence]], List[Union[pd.DataFrame, None]], List[pd.Series]]:
         data_pred = []
         dfs_alignment_info = []
@@ -214,6 +222,22 @@ class SentenceAligner:
                 sentence_alignment_filtered.append(aligned_sentence)
 
         return sentence_alignment_filtered
+
+    def save(self, path_to_pickle):
+        aligner = self.aligner
+        # Can't be pickled
+        self.aligner = None
+        with open(path_to_pickle, 'wb') as f:
+            pickle.dump(self, f)
+        self.aligner = aligner
+
+    @staticmethod
+    def load(path_to_pickle):
+        with open(path_to_pickle, 'rb') as f:
+            sentence_aligner = pickle.load(f)
+        sentence_aligner.setup()
+
+        return sentence_aligner
 
     def _create_char_alignment(
         self, truth_transcript_preprocessed: str, stt_transcript_preprocessed: str, do_length_ratio_full_transcript_filtering: bool

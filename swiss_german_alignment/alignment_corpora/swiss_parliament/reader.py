@@ -54,10 +54,10 @@ def read_data_split(
             duration_seconds = TinyTag.get(path_to_flac).duration
             if corpus_part_name in train_set:
                 data_train.append((truth_sentence_alignment, stt_output))
-                metadata_train.append(Metadata(duration_seconds))
+                metadata_train.append(Metadata(duration_seconds, corpus_part_name))
             elif corpus_part_name in test_set:
                 data_test.append((truth_sentence_alignment, stt_output))
-                metadata_test.append(Metadata(duration_seconds))
+                metadata_test.append(Metadata(duration_seconds, corpus_part_name))
             else:
                 print(f'{corpus_part_name}: neither included in train nor in test set')
         else:

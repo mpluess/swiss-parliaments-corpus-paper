@@ -1,0 +1,8 @@
+biopython>=1.75
+lightgbm>=2.3.1
+numpy>=1.16.4
+pandas>=0.25.3
+scikit-learn>=0.21.3
+scikit-optimize>=0.7.4
+spacy>=2.2.3
+tinytag>=1.2.2
