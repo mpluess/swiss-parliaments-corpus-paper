@@ -11,4 +11,4 @@ To run an example alignment of data/transcript.txt to data/audio.flac, follow th
 - python -m spacy download de_core_news_sm
 - python example.py
 
-The output will be written to sentence_alignment.txt. You can compare it with the expected output (data/sentence_alignment_expected_output.txt).
+The output will be written to sentence_alignment.txt. You can compare it with the expected output (data/sentence_alignment_expected_output.txt) to make sure everything worked.
