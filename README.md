@@ -1,6 +1,5 @@
 # swiss-parliaments-corpus-paper
-Code for the paper "Swiss Parliaments Corpus, an Automatically Aligned Swiss German Speech to Standard German Text Corpus".  
-TODO link
+Code for the paper "Swiss Parliaments Corpus, an Automatically Aligned Swiss German Speech to Standard German Text Corpus", available here: https://arxiv.org/abs/2010.02810
 
 ## Example
 To run an example alignment of data/transcript.txt to data/audio.flac, follow these steps:
